@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>James Estevez | Success Without Glamour: NIH Postdoctoral Fellows</title>
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Background See yesterday’s post about publications in Cell, Nature, and Science (CNS). During the discussion on Twitter Ethan Perlstein noted: @james\_estevez @mbeisen NSF and NIH are two different tribes. Much more glamorphilia among NIH-funded academics — Ethan Perlstein (@eperlste) January 30, 2013 and also: @eperlste @mbeisen Sure. Data set ..." />
+    <link rel="stylesheet" href="/theme/css/main.css" />
+    <link rel="stylesheet" href="/theme/fonts/main.css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!--[if IE]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body id="index" class="home">
+    <div id="wrapper">
+        <header id="banner" class="body">
+            <h1><a href="/">James Estevez</a></h1>
+            <br/><nav><ul>
+            </ul></nav>
+        </header>
+<section id="content" class="body">
+  <article class="container">
+    <header>
+      <h1 class="entry-title">Success Without Glamour: NIH Postdoctoral Fellows</h1>
+      <span class="date">Thu 31 January 2013</span>
+    </header>
+
+    <div class="entry-content">
+      <h2 id="background">Background</h2>
+<p>See <a href="http://james-estevez.github.com/Open_Access/2013/01/success-without-glamour-nsf-biology-postdoctoral-fellows-fy2012/">yesterday’s
+post</a>
+about publications in Cell, Nature, and Science (CNS). During the
+discussion on Twitter <a href="http://www.perlsteinlab.com/">Ethan Perlstein</a>
+noted:</p>
+<blockquote class="twitter-tweet"><p markdown="1">
+@<a href="https://twitter.com/james_estevez">james\_estevez</a>
+@<a href="https://twitter.com/mbeisen">mbeisen</a> NSF and NIH are two
+different tribes. Much more glamorphilia among NIH-funded academics
+</p>
+— Ethan Perlstein (@eperlste)
+<a href="https://twitter.com/eperlste/status/296759370400800769">January
+30, 2013</a>
+</blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>and also:</p>
+<blockquote class="twitter-tweet"><p markdown="1">
+@<a href="https://twitter.com/eperlste">eperlste</a>
+@<a href="https://twitter.com/mbeisen">mbeisen</a> Sure. Data set for
+F32 is much larger, \~1300, so it’ll run overnight.
+</p>
+— James Estevez (@james\_estevez)
+<a href="https://twitter.com/james_estevez/status/296766473324613632">January
+30, 2013</a>
+</blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>So, lets repeat the analysis.</p>
+<h2 id="methods">Methods</h2>
+<h3 id="data">Data</h3>
+<p>For this run I’ll use the <a href="http://projectreporter.nih.gov/Reporter_Viewsh.cfm?sl=10ECC80F4E88C5DF7598B8961CAA4A01A2FFCEB861BF">NSF F32
+Awards</a>
+as my data set. We have some duplicates so we’ll modify yesterday’s
+script accordingly:</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">csv</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="kn">import</span> <span class="n">Entrez</span>
+
+<span class="n">Entrez</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s">&quot;james.estevez@gmail.com&quot;</span>
+
+<span class="n">nih</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;nih_F32.csv&quot;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">))</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">nih</span><span class="p">:</span>
+    <span class="c"># Use rstrip to remove any trailing periods after the middle initial</span>
+    <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;Contact PI / Project Leader&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">))</span>
+
+<span class="c"># Remove duplicate entries</span>
+<span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+<span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</pre></div>
+
+
+<h3 id="analysis">Analysis</h3>
+<p>Again, I used <a href="http://biopython.org/wiki/Main_Page">Biopython’s</a> Entrez
+interface to PubMed (Cock et al. 2009). In addition to the NLM Unique
+IDs for the CNS journals (Nature:410462, Science:0404511, Cell:0413066),
+I added the PLoS journals (with the exception of PLoS Collections),<sup id="fnref:1"><a class="footnote-ref" href="#fn:1" rel="footnote">1</a></sup>
+and will use those in the search:</p>
+<div class="highlight"><pre><span class="n">glamour_NLM_ID</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;410462&#39;</span><span class="p">,</span><span class="s">&#39;0404511&#39;</span><span class="p">,</span><span class="s">&#39;0413066&#39;</span><span class="p">]</span>
+<span class="n">plos_NLM_ID</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;101183755&#39;</span><span class="p">,</span><span class="s">&#39;101231360&#39;</span><span class="p">,</span><span class="s">&#39;101238921&#39;</span><span class="p">,</span><span class="s">&#39;101238922&#39;</span><span class="p">,</span><span class="s">&#39;101239074&#39;</span><span class="p">,</span><span class="s">&#39;101285081&#39;</span><span class="p">,</span><span class="s">&#39;101291488&#39;</span><span class="p">]</span>
+
+<span class="c"># Set up data structures:</span>
+<span class="c"># list of names</span>
+<span class="n">annointed_ones</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">enlightened_ones</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="c"># Any names which generate malformed xml go here</span>
+<span class="n">no_xml</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+
+
+<p>Another change is that I store the Entrez results in a dictionary for
+separate analysis.</p>
+<div class="highlight"><pre><span class="c"># Lets save some data in case we want it for later analysis. Create a dictionary</span>
+<span class="c"># containing the PMIDs and NLMUIDs for each fellow</span>
+<span class="n">pubs</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+
+<p>Next, I looped over each name, searching PubMed, then extracting any
+hits, and skipping over any names which lacked them:</p>
+<div class="highlight"><pre><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+    <span class="c"># Search pubmed for all hits with our authors name</span>
+    <span class="k">print</span> <span class="n">name</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esearch</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s">&quot;pubmed&quot;</span><span class="p">,</span> <span class="n">term</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;[AUTH]&#39;</span><span class="p">]))</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="c"># Get the records</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s">&quot;IdList&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">hits</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">efetch</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s">&quot;pubmed&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="s">&quot;IdList&quot;</span><span class="p">],</span> <span class="n">retmode</span><span class="o">=</span><span class="s">&quot;xml&quot;</span><span class="p">)</span>
+            <span class="n">hitlist</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span>
+            <span class="n">hits</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c"># make a list of NLM UIDs</span>
+            <span class="n">nlmIDs</span><span class="o">=</span><span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s">&#39;MedlineCitation&#39;</span><span class="p">][</span><span class="s">&#39;MedlineJournalInfo&#39;</span><span class="p">][</span><span class="s">&#39;NlmUniqueID&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hitlist</span><span class="p">]</span>
+            <span class="n">journal_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s">&#39;MedlineCitation&#39;</span><span class="p">][</span><span class="s">&#39;Article&#39;</span><span class="p">][</span><span class="s">&#39;Journal&#39;</span><span class="p">][</span><span class="s">&#39;Title&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hitlist</span><span class="p">]</span>
+            <span class="n">pubs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;PMID&#39;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s">&quot;IdList&quot;</span><span class="p">],</span> <span class="s">&#39;NLMUID&#39;</span><span class="p">:</span> <span class="n">nlmIDs</span><span class="p">,</span> <span class="s">&#39;journal_titles&#39;</span><span class="p">:</span> <span class="n">journal_titles</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">no_xml</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">continue</span>
+</pre></div>
+
+
+<p>Writing the results this to disk this time:</p>
+<div class="highlight"><pre><span class="c"># Save the pubs dictionary into a pickle file.</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pubs</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span> <span class="s">&quot;nih_pubs_dict.p&quot;</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span> <span class="p">)</span> <span class="p">)</span>
+
+<span class="c"># Write plain text dict to file:</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;nih_pubs_dict.txt&#39;</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">pubs</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> 
+</pre></div>
+
+
+<p>I set this to run overnight. I then parse the results as following:</p>
+<div class="highlight"><pre><span class="c"># Load results. Create a dictionary containing the PMIDs and NLMUIDs</span>
+<span class="c"># for each fellow</span>
+<span class="n">pubs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span> <span class="s">&quot;nih_pubs_dict.p&quot;</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span> <span class="p">))</span>
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pubs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="c"># Search pubmed for all hits with our authors name</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pubs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;NLMUID&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">glamour_NLM_ID</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># Wow, congrats!</span>
+        <span class="n">annointed_ones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pubs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;NLMUID&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">plos_NLM_ID</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># Wow, congrats!</span>
+        <span class="n">enlightened_ones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">continue</span>
+</pre></div>
+
+
+<p>Code and data available <a href="https://gist.github.com/4687024">here</a>.</p>
+<h2 id="results">Results</h2>
+<p>I collected any names with CNS hits in the <code>annointed_ones</code> list, which
+we can compare with all the names:</p>
+<div class="highlight"><pre><span class="n">cns_pct</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annointed_ones</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">pubs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">plos_pct</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enlightened_ones</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">pubs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+
+<span class="k">print</span> <span class="s">&quot;Unique names: &quot;</span>
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Successful queries: &quot;</span>
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Successful query percentage: &quot;</span>
+<span class="k">print</span> <span class="s">&quot;{0:.2f}%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pubs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">CNS pub percentage: &quot;</span>
+<span class="k">print</span> <span class="s">&quot;{0:.2f}%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cns_pct</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">PLoS pub percentage: &quot;</span>
+<span class="k">print</span> <span class="s">&quot;{0:.2f}%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plos_pct</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Which returns:</p>
+<div class="highlight"><pre>Unique names: 
+887
+
+Successful queries: 
+403
+
+Successful query percentage: 
+45.43%
+
+CNS pub percentage: 
+9.43%
+
+PLoS pub percentage: 
+2.48%
+</pre></div>
+
+
+<p>So we have 38 Postdoctoral fellows with CNS publications, or about 9.4%
+of the successful queries.</p>
+<h2 id="discussion">Discussion</h2>
+<p>This is a very rough sketch, obviously, but initially it appears that
+the difference isn’t as large as one might expect. Other notes:</p>
+<ul>
+<li>Need to rerun to get the whole data set, but I don’t expect the
+    results to be very different.</li>
+<li>The script needs to be a bit more robust. Entrez is a little opaque,
+    and errors in the small test sample were resolved by re-querying, so
+    the script probably needs to iterate over the dictionary until all
+    results are filled or some sane limit is reached.</li>
+<li>A couple of other ideas:<ul>
+<li>Do people with CNS pubs get more funding? (Small sample size,
+    though)</li>
+<li>Do people at elite institutions have more CNS pubs. (But: small
+    <em>n</em>, chicken &amp; egg, etc.)</li>
+<li>As far as NIH publicatons are concerned JAMA should probably be
+    included, but for that matter a comparison with impact factors
+    or H-index might be useful. That might be an entry into the
+    faculty and PI side of the problem, because while the idea of
+    figuring out tenure track numbers by way of parsing hundreds of
+    faculty web pages makes me want to go play in traffic,
+    attempting to address the question of grants seems relatively
+    straightforward.<sup id="fnref:2"><a class="footnote-ref" href="#fn:2" rel="footnote">2</a></sup></li>
+</ul>
+</li>
+</ul>
+<p>There you have it.</p>
+<h2 id="follow-up">Follow-up</h2>
+<ul>
+<li>TODO Take a look at the <a href="http://ropensci.org/">ROpenSci</a> packages
+    <a href="https://github.com/ropensci/rentrez">rentrez</a> and
+    <a href="https://github.com/ropensci/rpubmed">rpubmed</a>, or buckle down with
+    RPy2… again.</li>
+</ul>
+<h2 id="references">References</h2>
+<p>Cock PJA, Antao T, Chang JT, Chapman BA, Cox CJ, Dalke A, Friedberg I,
+Hamelryck T, Kauff F, Wilczynski B, et al. 2009. Biopython: freely
+available Python tools for computational molecular biology and
+bioinformatics. <i>Bioinformatics</i> <b>25</b>: 1422–1423.
+http://bioinformatics.oxfordjournals.org/content/25/11/1422 (Accessed
+January 30, 2013).</p>
+<p><span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_id=info%3Adoi%2F10.1093%2Fbioinformatics%2Fbtp163&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=Biopython%3A%20freely%20available%20Python%20tools%20for%20computational%20molecular%20biology%20and%20bioinformatics&amp;rft.jtitle=Bioinformatics&amp;rft.stitle=Bioinformatics&amp;rft.volume=25&amp;rft.issue=11&amp;rft.aufirst=Peter%20J.%20A.&amp;rft.aulast=Cock&amp;rft.au=Peter%20J.%20A.%20Cock&amp;rft.au=Tiago%20Antao&amp;rft.au=Jeffrey%20T.%20Chang&amp;rft.au=Brad%20A.%20Chapman&amp;rft.au=Cymon%20J.%20Cox&amp;rft.au=Andrew%20Dalke&amp;rft.au=Iddo%20Friedberg&amp;rft.au=Thomas%20Hamelryck&amp;rft.au=Frank%20Kauff&amp;rft.au=Bartek%20Wilczynski&amp;rft.au=Michiel%20J.%20L.%20de%20Hoon&amp;rft.date=2009-06-01&amp;rft.pages=1422-1423&amp;rft.spage=1422&amp;rft.epage=1423&amp;rft.issn=1367-4803%2C%201460-2059"/>
+Marshall JC, Buttars P, Callahan T, Dennehy JJ, Harris DJ, Lunt B, Mika
+M, Shupe R. 2009. Letter to the Editors. <i>Israel Journal of Ecology
+and Evolution</i> <b>55</b>: 381–392.
+http://www.sciencefromisrael.com/openurl.asp?genre=article&amp;id=doi:10.1560/IJEE.55.4.381
+(Accessed January 31, 2013).</p>
+<p><span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_id=info%3Adoi%2F10.1560%2FIJEE.55.4.381&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=Letter%20to%20the%20Editors&amp;rft.jtitle=Israel%20Journal%20of%20Ecology%20and%20Evolution&amp;rft.volume=55&amp;rft.issue=4&amp;rft.aufirst=Jonathon%20C.&amp;rft.aulast=Marshall&amp;rft.au=Jonathon%20C.%20Marshall&amp;rft.au=Paul%20Buttars&amp;rft.au=Thomas%20Callahan&amp;rft.au=John%20J.%20Dennehy&amp;rft.au=D.%20James%20Harris&amp;rft.au=Bryce%20Lunt&amp;rft.au=Markus%20Mika&amp;rft.au=Robert%20Shupe&amp;rft.date=2009-12-01&amp;rft.pages=381%E2%80%93392&amp;rft.issn=1565-9801"/></p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>I’m using PLoS as a stand-in for OA journals. Including other
+journals, or individually open articles, would probably produce
+different results.&#160;<a class="footnote-backref" href="#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>TODO: read the link to Marshall et al. (2009) posted by
+@<a href="https://twitter.com/pleunipennings">pleunipennings</a>, one of whose
+authors, Markus Mika, happens to be down the street at UNLV. A look
+at the literature would be in order, ironically.&#160;<a class="footnote-backref" href="#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+<footer class="post-info">
+
+</footer><!-- /.post-info -->    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <div class="clear-footer"></div>
+    </div>
+    <footer id="contentinfo" class="body">
+        <div class="social">
+            <a href="mailto:james@jamesestevez.com" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-envelope fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://github.com/james-estevez" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-github fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://twitter.com/jstvz" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-twitter fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+        </div>
+        <p>
+            ©2013 James Estevez
+            <br/>Built with <a href="https://github.com/getpelican/pelican" target="_blank">Pelican</a>.
+        </p>
+    </footer>
+
+</body>
+</html>

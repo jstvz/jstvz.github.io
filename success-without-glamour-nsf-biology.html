@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>James Estevez | Success Without Glamour: NSF Biology</title>
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Background So there was a discussion on Twitter, started by Michael Eisen using the hashtag #SuccessWithoutGlamour discussing the necessity of publishing in the Big Three journals (CNS, or Cell, Nature, and Science). Heartening responses, but I suspected there might be some selection bias and decided to take a marginally more ..." />
+    <link rel="stylesheet" href="/theme/css/main.css" />
+    <link rel="stylesheet" href="/theme/fonts/main.css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!--[if IE]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body id="index" class="home">
+    <div id="wrapper">
+        <header id="banner" class="body">
+            <h1><a href="/">James Estevez</a></h1>
+            <br/><nav><ul>
+            </ul></nav>
+        </header>
+<section id="content" class="body">
+  <article class="container">
+    <header>
+      <h1 class="entry-title">Success Without Glamour: NSF Biology</h1>
+      <span class="date">Wed 30 January 2013</span>
+    </header>
+
+    <div class="entry-content">
+      <h2 id="background">Background</h2>
+<p>So there was a <a href="http://storify.com/nextgenseek/successs-without-glamor-publications-in-academia">discussion on
+Twitter</a>,
+started by <a href="http://www.michaeleisen.org/blog/">Michael Eisen</a> using the
+hashtag <code>#SuccessWithoutGlamour</code> discussing the necessity of publishing
+in the Big Three journals (CNS, or Cell, Nature, and Science).
+Heartening responses, but I suspected there might be some selection bias
+and decided to take a marginally more quantitative look.</p>
+<h2 id="methods">Methods</h2>
+<h3 id="data">Data</h3>
+<p>I thought <a href="http://figshare.com/articles/Prevalence_and_use_of_Twitter_among_scholars/104629">this
+poster</a>
+by Priem and colleagues was interesting and took it as a starting point
+(Priem, Costello, and Dzuba 2012). I’m rather pressed for time, so I
+couldn’t try their manual approach to look at faculty, so I decided to
+narrow the question considerably. I didn’t want to spend a bunch of time
+parsing HTML either, so I decided to focus on the current NSF biology
+postdoctoral fellows. I exported a csv from the <a href="http://www.nsf.gov/awardsearch/advancedSearchResult?PIId=&amp;PIFirstName=&amp;PILastName=&amp;PIOrganization=&amp;PIState=&amp;PIZip=&amp;PICountry=&amp;ProgOrganization=08000000&amp;ProgEleCode=1157%2C8054%2C8105&amp;BooleanElement=Any&amp;ProgRefCode=&amp;BooleanRef=All&amp;Program=&amp;ProgOfficer=&amp;Keyword=&amp;AwardNumberOperator=&amp;AwardAmount=&amp;AwardInstrument=&amp;ActiveAwards=true&amp;ExpiredAwards=true&amp;OriginalAwardDateOperator=After&amp;OriginalAwardDateFrom=06%2F21%2F2010&amp;StartDateOperator=&amp;ExpDateOperator=">NSF’s
+search</a>
+containing 88 active or expired fellowships awarded after 21 June 2010
+(around the time of PLoS One’s first impact factor).</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">csv</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="kn">import</span> <span class="n">Entrez</span>
+
+<span class="n">Entrez</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s">&quot;james.estevez@gmail.com&quot;</span>
+
+<span class="n">nsf</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;Awards.csv&quot;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">))</span>
+
+<span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">nsf</span><span class="p">:</span>
+    <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;PrincipalInvestigator&#39;</span><span class="p">])</span>
+</pre></div>
+
+
+<h3 id="analysis">Analysis</h3>
+<p>As we see above, I used
+<a href="http://biopython.org/wiki/Main_Page">Biopython’s</a> Entrez interface to
+PubMed (Cock et al. 2009). I manually located the NLM Unique IDs for the
+CNS journals (Nature:410462, Science:0404511, Cell:0413066), and will
+use those in the search:</p>
+<div class="highlight"><pre><span class="n">glamour_NLM_ID</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;410462&#39;</span><span class="p">,</span><span class="s">&#39;0404511&#39;</span><span class="p">,</span><span class="s">&#39;0413066&#39;</span><span class="p">]</span>
+<span class="n">annointed_ones</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">no_xml</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+
+
+<p>Next, I looped over each name, searching PubMed, then extracting any
+hits, and skipping over any names which lacked them:</p>
+<div class="highlight"><pre><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+    <span class="c"># Search pubmed for all hits with our authors name</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esearch</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s">&quot;pubmed&quot;</span><span class="p">,</span> <span class="n">term</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;[AUTH]&#39;</span><span class="p">]))</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="c"># Get the records</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s">&quot;IdList&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">hits</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">efetch</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s">&quot;pubmed&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="s">&quot;IdList&quot;</span><span class="p">],</span> <span class="n">retmode</span><span class="o">=</span><span class="s">&quot;xml&quot;</span><span class="p">)</span>
+            <span class="n">hitlist</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span>
+            <span class="n">hits</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c"># make a list of NLM UIDs</span>
+            <span class="n">nlmIDs</span><span class="o">=</span><span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s">&#39;MedlineCitation&#39;</span><span class="p">][</span><span class="s">&#39;MedlineJournalInfo&#39;</span><span class="p">][</span><span class="s">&#39;NlmUniqueID&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hitlist</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">nlmIDs</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">glamour_NLM_ID</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># Wow, congrats!</span>
+                <span class="n">journal_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">hit</span><span class="p">[</span><span class="s">&#39;MedlineCitation&#39;</span><span class="p">][</span><span class="s">&#39;Article&#39;</span><span class="p">][</span><span class="s">&#39;Journal&#39;</span><span class="p">][</span><span class="s">&#39;Title&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hitlist</span><span class="p">]</span>
+                <span class="n">annointed_ones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">except</span> <span class="n">NotXMLError</span><span class="p">:</span>
+        <span class="n">no_xml</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Code and data available <a href="https://gist.github.com/4676635">here</a>.</p>
+<h2 id="results">Results</h2>
+<p>Error checking:</p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">no_xml</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+
+
+<p>I collected any names with hits in the <code>annointed_ones</code> list, which we
+can compare with all the names:</p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">pct</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annointed_ones</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pct</span>
+<span class="mf">5.681818181818182</span>
+</pre></div>
+
+
+<p>So we have five Postdoctoral fellows with CNS publications, or about
+5.7% of the total.</p>
+<h2 id="discussion">Discussion</h2>
+<p>This is a mere proof of concept. Obvious follow-ups:</p>
+<ul>
+<li>What about OA publications?</li>
+<li>This needs to be expanded to be more specific, and to account for
+    common surnames.</li>
+<li>Faculty, of course, are a different animal entirely. You’d probably
+    want to look at tenure track faculty, but I can’t think of a clean
+    and automated way to do so.</li>
+</ul>
+<p>And others which escape me at the moment. I may return to this in the
+future, at the very least to rerun this with OA journals included, or to
+get more detailed information on the publications in which the fellows
+did publish.</p>
+<h2 id="refs">Refs</h2>
+<p>Cock PJA, Antao T, Chang JT, Chapman BA, Cox CJ, Dalke A, Friedberg I,
+Hamelryck T, Kauff F, Wilczynski B, et al. 2009. Biopython: freely
+available Python tools for computational molecular biology and
+bioinformatics. Bioinformatics [Internet] 25:1422–1423. Available from:
+http://bioinformatics.oxfordjournals.org/content/25/11/1422</p>
+<p><span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_id=info%3Adoi%2F10.1093%2Fbioinformatics%2Fbtp163&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=Biopython%3A%20freely%20available%20Python%20tools%20for%20computational%20molecular%20biology%20and%20bioinformatics&amp;rft.jtitle=Bioinformatics&amp;rft.stitle=Bioinformatics&amp;rft.volume=25&amp;rft.issue=11&amp;rft.aufirst=Peter%20J.%20A.&amp;rft.aulast=Cock&amp;rft.au=Peter%20J.%20A.%20Cock&amp;rft.au=Tiago%20Antao&amp;rft.au=Jeffrey%20T.%20Chang&amp;rft.au=Brad%20A.%20Chapman&amp;rft.au=Cymon%20J.%20Cox&amp;rft.au=Andrew%20Dalke&amp;rft.au=Iddo%20Friedberg&amp;rft.au=Thomas%20Hamelryck&amp;rft.au=Frank%20Kauff&amp;rft.au=Bartek%20Wilczynski&amp;rft.au=Michiel%20J.%20L.%20de%20Hoon&amp;rft.date=2009-06-01&amp;rft.pages=1422-1423&amp;rft.spage=1422&amp;rft.epage=1423&amp;rft.issn=1367-4803%2C%201460-2059"/>
+Priem J, Costello K, Dzuba T. 2012. Prevalence and use of Twitter among
+scholars. FigShare.</p>
+<p><span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=Prevalence%20and%20use%20of%20Twitter%20among%20scholars&amp;rft.stitle=FigShare&amp;rft.aufirst=Jason&amp;rft.aulast=Priem&amp;rft.au=Jason%20Priem&amp;rft.au=Kaitlin%20Costello&amp;rft.au=Tyler%20Dzuba&amp;rft.date=2012-12-20"/></p>
+<footer class="post-info">
+
+</footer><!-- /.post-info -->    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <div class="clear-footer"></div>
+    </div>
+    <footer id="contentinfo" class="body">
+        <div class="social">
+            <a href="mailto:james@jamesestevez.com" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-envelope fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://github.com/james-estevez" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-github fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://twitter.com/jstvz" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-twitter fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+        </div>
+        <p>
+            ©2013 James Estevez
+            <br/>Built with <a href="https://github.com/getpelican/pelican" target="_blank">Pelican</a>.
+        </p>
+    </footer>
+
+</body>
+</html>

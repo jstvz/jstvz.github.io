@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>James Estevez | Government tech and the proprietary software lockbox</title>
+  <meta property="og:type" content="article" />
+  <meta name="description" content="The request In July, the City of Las Vegas Municipal Court (LVMC) denied my records request for electronic court records because its data was “proprietary and owned by [its] vendor, NevSys” (PDF). In response I cited the Nevada Electronic Filing and Conversion Rule 5(j)(2), but to no avail ..." />
+    <meta property="article:tag" content="[foss" />
+    <meta property="article:tag" content="procurement" />
+    <meta property="article:tag" content="opengov]" />
+    <link rel="stylesheet" href="/theme/css/main.css" />
+    <link rel="stylesheet" href="/theme/fonts/main.css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!--[if IE]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body id="index" class="home">
+    <div id="wrapper">
+        <header id="banner" class="body">
+            <h1><a href="/">James Estevez</a></h1>
+            <br/><nav><ul>
+            </ul></nav>
+        </header>
+<section id="content" class="body">
+  <article class="container">
+    <header>
+      <h1 class="entry-title">Government tech and the proprietary software lockbox</h1>
+      <span class="date">Sun 29 September 2013</span>
+    </header>
+
+    <div class="entry-content">
+      <h2 id="the-request">The request</h2>
+<p>In July, the City of Las Vegas Municipal Court (LVMC) denied my records
+request for electronic court records because its data was “proprietary
+and owned by [its] vendor, <a href="http://www.nevsys.com/">NevSys</a>”
+(<a href="/assets/files/LVMC-20130731.pdf">PDF</a>). In response I cited the Nevada
+Electronic Filing and Conversion <a href="http://www.leg.state.nv.us/courtrules/NEFCR.html#NEFCRRule5">Rule
+5(j)(2)</a>,
+but to no avail. I was advised to review the contract between the City
+and Nevsys governing the development of “COURTassist,” the <abbr
+title='Las Vegas Municipal Court'>LVMC</abbr>’s Case Management System.</p>
+<p>On 29 July I visited the City’s <a href="https://www.lasvegasnevada.gov/Business/doing_business.asp">Purchasing and Contracts
+Division</a> at
+City Hall and I asked to inspect CLV Contract No. 040396
+(<a href="/assets/files/CLV-20130729.pdf">PDF</a>). After some initial confusion
+about whether or not citizens may scan a record, or a portion thereof,
+during such an inspection (they may), I was informed that the staffer
+responsible was not available and I would be unable to inspect the
+contract that day. I got in touch with the staffer and set an
+appointment to inspect the contract. This was followed by a rather
+tedious series of reschedulings over the following weeks.<sup id="fnref:1"><a class="footnote-ref" href="#fn:1" rel="footnote">1</a></sup></p>
+<p>The City finally turned over 378 pages of contract documents on 19
+September. These documents are embedded <a href="#docs">below</a>.</p>
+<h2 id="contract-highlights">Contract highlights</h2>
+<p>The project to develop COURTassist was overtaken by events and was
+delivered over budget and several years behind schedule. In short, City:</p>
+<ul>
+<li>paid NevSys \$1,037,966 to develop the software;</li>
+<li>provided them office space and at least three full-time City
+    employees to develop it;</li>
+<li>signed over its ownership to NevSys in exchange for a 2% royalty
+    payment;</li>
+<li>now pays \$134,000/year (indexed to the CPI) to NevSys for support
+    and maintenance.</li>
+</ul>
+<p>Also turns out that there are several manuals that were responsive to
+the original request. As a comparison, I’m asking other courts in the
+area what their licensing and deployment costs were, but I suspect that
+the City didn’t do as badly as I had originally thought.<sup id="fnref:2"><a class="footnote-ref" href="#fn:2" rel="footnote">2</a></sup></p>
+<h2 id="issues">Issues</h2>
+<p>As reflected in the contract documents, the City’s experience during the
+development of the Municipal Court’s <abbr title="Case
+Management System">CMS</abbr> spotlights several fundamental problems
+with how it and the <abbr title="Nevada Public Records
+Act">NPRA</abbr> treats software and electronic records.</p>
+<h3 id="the-city-ought-to-have-retained-ownership-of-the-courtassist-source-code">The City ought to have retained ownership of the COURTassist source code</h3>
+<p>In my view, the City lost an important opportunity by relinquishing its
+ownership in the <abbr title="Case Management System">CMS</abbr> to
+NevSys. While the City has until 2016 to recoup its investment it seems
+unlikely that it will do so; as far as I can tell, the only other
+jurisdiction which adopted this software was Boulder City, Nevada, and
+that was at no cost.</p>
+<p><em>Ceteris paribus</em>, for what the City has paid it could have kept
+ownership of the source code and made it freely (both free as in
+<a href="https://en.wikipedia.org/wiki/Free_software">freedom</a> and as in no
+cost) available to other cities, with the contractor providing support
+just as they are now. Practically speaking, doing so might have saved
+taxpayers money in cities across the country and gone some way to
+diversifying the market. With the software open, users could customize
+it to meet their specific needs, and benefit from the continuous
+improvement by the community of users. NevSys could have filled—and
+still can—a niche in the market by adopting an open source <a href="https://en.wikipedia.org/wiki/Business_models_for_open-source_software">business
+model</a>,
+such as <a href="https://en.wikipedia.org/wiki/Red_Hat">Red Hat’s</a> subscription
+model.</p>
+<h3 id="proprietary-software-and-open-governance">Proprietary software and open governance</h3>
+<p>The difficulty I’ve encountered obtaining data during the course of the
+Arrests project underscores the risks to open governance posed by
+proprietary software. I only received two outright denials, one from the
+<abbr title="Las Vegas Metropolitan Police
+Department">lvmpd</abbr>, and the other from the <abbr title="Las
+Vegas Municipal Court">LVMC</abbr>. Both claimed that even a mere
+listing of the data elements present in their databases constituted
+proprietary information that could not be released to the public.<sup id="fnref:3"><a class="footnote-ref" href="#fn:3" rel="footnote">3</a></sup>
+Both the NevSys and <a href="/notebook/2013/09/lvmpd-database-documents">IAPro</a>
+contracts make broad assertions of confidentiality that are immediately
+followed by clauses weakly acknowledging the Nevada Public Records Act.
+These contortions are required because the democratic principles of
+openness and public access which are enshrined in the
+<abbr title="Nevada
+Public Records Act">NPRA</abbr> are in conflict with the business model
+for proprietary software.</p>
+<p>The principled argument that free (as in freedom) software should
+generally be preferred to closed source proprietary software is one that
+I would hope resonates with public sector policymakers and IT managers.
+Government agencies need to insist on free software in order to preserve
+their control over their own computing. Most government activities now
+depend on computing, and an agency’s control over those activities—and
+the data they generate—depends on its control over that computing.</p>
+<p>While the IAPro contract egregiously cedes total control over the
+release of information to the vendor, <a href="http://www.ci-technologies.com/">CI
+Technologies</a>,<sup id="fnref:4"><a class="footnote-ref" href="#fn:4" rel="footnote">4</a></sup> the NevSys contract
+simply obligates the City to submit public records requests to NevSys
+for review. The company has two days to object; if it does so, the
+company has a week to file for a temporary restraining order to prevent
+the release of documents and seek judicial review.<sup id="fnref:5"><a class="footnote-ref" href="#fn:5" rel="footnote">5</a></sup> The government
+has a responsibility to the people to maintain control over its data and
+the computing it does on their behalf, and must never cede control to
+private vendors.</p>
+<p>A tad simplistic, perhaps. Practical considerations and an aversion to
+perceived risk mean that government IT projects often fall short of this
+standard, although trends suggest that this is changing.<sup id="fnref:6"><a class="footnote-ref" href="#fn:6" rel="footnote">6</a></sup></p>
+<h4 id="preserving-public-access-to-government-data">Preserving public access to government data</h4>
+<p>One pernicious effect of the reliance upon proprietary software is that
+public records (data) may become <a href="http://www.courtnewsohio.gov/cases/2013/SCO/0307/121296.asp#.UkfmX4BXZFQ">“inextricably
+intertwined”</a>
+with the software and thus inaccessible to the public without paying for
+the use of those programs.<sup id="fnref:7"><a class="footnote-ref" href="#fn:7" rel="footnote">7</a></sup> Recently, in <em><a href="http://www.courts.ca.gov/opinions/documents/S194708.PDF">Sierra Club v. County of
+Orange</a></em> the
+California Supreme Court unanimously overturned a 2011 appellate
+decision <a href="http://www.rcfp.org/browse-media-law-resources/news/government-can-charge-licensing-fees-gis-data">allowing agencies to charge licensing fees for GIS
+data</a>.</p>
+<p>Preserving public access requires that sunshine laws keep pace with
+technological advances. Florida law provides an excellent <a href="http://www.myflsunshine.com/sun.nsf/sunmanual/d85cde087c3a6818852566f3007272ea">model
+policy</a>:</p>
+<blockquote>
+<p><strong>119.01 General state policy on public records.</strong></p>
+<p>(a). Automation of public records must not erode the right of access
+to those records. As each agency increases its use of and dependence
+on electronic recordkeeping, each agency must provide reasonable
+public access to records electronically maintained and must ensure
+that exempt or confidential records are not disclosed except as
+otherwise permitted by law.</p>
+<p>(b). When designing or acquiring an electronic recordkeeping system,
+an agency must consider whether such system is capable of providing
+data in some common format such as, but not limited to, the American
+Standard Code for Information Interchange.</p>
+<p>(c). An agency may not enter into a contract for the creation or
+maintenance of a public records database if that contract impairs the
+ability of the public to inspect or copy the public records of the
+agency, including public records that are on-line or stored in an
+electronic recordkeeping system used by the agency.</p>
+<p>(d). Subject to the restrictions of copyright and trade secret laws
+and public records exemptions, agency use of proprietary software must
+not diminish the right of the public to inspect and copy a public
+record.</p>
+<p>(e). Providing access to public records by remote electronic means is
+an additional method of access that agencies should strive to provide
+to the extent feasible. If an agency provides access to public records
+by remote electronic means, such access should be provided in the most
+cost-effective and efficient manner available to the agency providing
+the information.</p>
+</blockquote>
+<p>The State of Connecticut’s Bureau of Enterprise Systems &amp; Technology
+published <a href="http://www.ct.gov/best/cwp/view.asp?a=1244&amp;q=321652">system design
+guidelines</a> to help
+state agencies and municipalities to comply with <a href="http://www.state.ct.us/foi/2003FOIA/Sec.%201-211.htm">Connecticut’s FOIA
+provisions relating to electronic public
+records</a>.<sup id="fnref:8"><a class="footnote-ref" href="#fn:8" rel="footnote">8</a></sup>
+These include:</p>
+<blockquote>
+<ol>
+<li>Ability to access, manipulate and report data currently available
+    in any applications which are being replaced with a minimum of
+    “translation” or modification of tables, parameters, or other
+    factors;</li>
+<li>Clear identification of that information in the database which is
+    not exempt from FOIA;</li>
+<li>Use of separate tables for exempt and non-exempt data;</li>
+<li>Use of a database which allows security at a field level;</li>
+<li>Use of non-proprietary data structures and reporting tools;</li>
+<li>Data “backups” which ensure availability, including catastrophic
+    loss of primary data, disaster or business interruption;</li>
+<li>Permanent copies of data stored on optical or other non
+    destructible media where possible;</li>
+<li>Compliance with any applicable standards-setting body for data
+    creation, data sharing, management or communication in the field;</li>
+<li>Source code ownership by the municipality or the State of
+    Connecticut and source code escrow by the vendor;</li>
+</ol>
+</blockquote>
+<p>These are both good places to start. The City of Las Vegas is headed in
+the right direction; it established an <a href="http://lasvegas.opendata.junar.com/home/">open data
+portal</a> as part of <a href="http://www.lasvegasnevada.gov/Publications/28685.htm">its
+participation</a> in
+the <a href="http://www.hackforchange.org/">National Day of Civic Hacking</a>, and
+posts its <a href="http://clvplaces.appspot.com/">GIS data</a> online as well. So
+it seems that the problem here isn’t with the intentions of the City,
+but with the approach that’s been taken thus far. Its announced open
+data policies pertain to particular data sets, cherry picked by the
+government, but leave the great majority of the data generated by its
+day to day operations locked out of sight. The City must adopt
+appropriate policies and guidelines to ensure that requirements for
+future IT projects incorporate safeguards for citizens’ access to public
+records.</p>
+<hr />
+<h2 id="docs">Documents produced in response to request no. CLV-20130728</h2>
+<iframe class="scribd_iframe_embed" src="//www.scribd.com/embeds/169712452/content?start_page=1&view_mode=scroll&access_key=key-1i28pyzbmnqqr57uw2kk&show_recommendations=false" data-auto-height="false" data-aspect-ratio="0.772922022279349" scrolling="no" id="doc_67599" width="100%" height="600" frameborder="0"></iframe>
+
+<iframe class="scribd_iframe_embed" src="//www.scribd.com/embeds/169715151/content?start_page=1&view_mode=scroll&access_key=key-2q4y17r13tn9rkjski0&show_recommendations=false" data-auto-height="false" data-aspect-ratio="0.772922022279349" scrolling="no" id="doc_70688" width="100%" height="600" frameborder="0"></iframe>
+
+<iframe class="scribd_iframe_embed" src="//www.scribd.com/embeds/169691770/content?start_page=1&view_mode=scroll&access_key=key-hkrsstydsvx7ke3ozat&show_recommendations=false" data-auto-height="false" data-aspect-ratio="0.772922022279349" scrolling="no" id="doc_9865" width="100%" height="600" frameborder="0"></iframe>
+
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Read the email exchange (<a href="/assets/files/CLV-20130917.pdf">PDF</a>).&#160;<a class="footnote-backref" href="#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>I had drawn some negative inferences from the mishandling of my
+requests by the Municipal Court, and the fact that NevSys removed
+any mention of COURTassist from its website (<a href="http://nevsys.com/">current
+version</a>, <em>cf.</em> <a href="http://web.archive.org/web/20130623133310/http://nevsys.com/">June 23, 2013
+version</a>)
+some time after my request in June 2013.&#160;<a class="footnote-backref" href="#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>However, at the very least, NRS 239.010 and the <a href="https://en.wikipedia.org/wiki/Fair_use">fair
+use</a> provisions of federal
+copyright law allow public records to be made available to the
+public for examination and inspection purposes only.&#160;<a class="footnote-backref" href="#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p>See <a href="/notebook/2013/09/lvmpd-database-documents">IAPro item #2</a>,
+and page 8 of the IAPro contract documents
+(<a href="/assets/files/LVMPD-20130917.pdf">PDF</a>).&#160;<a class="footnote-backref" href="#fnref:4" rev="footnote" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p>And any documents produced are presumably forwarded as well; an
+envelope identical to mine, but addressed to “Javed Buttar” (NevSys’
+owner), was at the City Attorney’s Office front desk when I picked
+up the CD.&#160;<a class="footnote-backref" href="#fnref:5" rev="footnote" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p>See the <a href="http://www.opengovplatform.org/">OGPL</a>, based on
+<a href="http://www.data.gov/">Data.gov</a>, and the Veterans Health
+Administration’s <a href="https://en.wikipedia.org/wiki/VistA">VistA electronic health
+record</a>.&#160;<a class="footnote-backref" href="#fnref:6" rev="footnote" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p><em>State ex rel. Gambill v. Opperman</em>, 2013 Ohio 761 (OH Supreme
+Court 2013), Pfeifer’s dissent: “The county engineer in this case
+has intertwined public records with proprietary software and expects
+citizens seeking public records to pay an exorbitant price to untie
+the knot. A person seeking public records should expect to pay the
+price for copying the records, but not the price for a public
+entity’s mistake in purchasing inefficient software. Will every
+citizen asking for what relator, Robert Gambill, seeks—access to
+records that the majority acknowledges are public records—also have
+to pay \$2,000? The holding in this case encourages public entities
+desiring secrecy to hide public records within a software lockbox
+and require individual citizens to provide the golden key to unlock
+it.” .&#160;<a class="footnote-backref" href="#fnref:7" rev="footnote" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:8">
+<p>Found via <a href="http://braydon.com">Braydon Fuller</a>. Fuller has argued
+that taxpayer-funded software should be available to the public and
+compiled a helpful <a href="http://aweplanet.com/braydon/2013/02/state-public-records-laws-for-software-disclosure/">list of how state public records laws treat
+software</a>.&#160;<a class="footnote-backref" href="#fnref:8" rev="footnote" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+<footer class="post-info">
+  <p>Tags: 
+    <a href="/tag/foss.html">[foss</a>
+    <a href="/tag/procurement.html">procurement</a>
+    <a href="/tag/opengov.html">opengov]</a>
+  </p>
+
+</footer><!-- /.post-info -->    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <div class="clear-footer"></div>
+    </div>
+    <footer id="contentinfo" class="body">
+        <div class="social">
+            <a href="mailto:james@jamesestevez.com" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-envelope fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://github.com/james-estevez" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-github fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+            <a href="https://twitter.com/jstvz" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-twitter fa-stack-1x dat-icon"></i>
+                </span>
+            </a>
+        </div>
+        <p>
+            ©2013 James Estevez
+            <br/>Built with <a href="https://github.com/getpelican/pelican" target="_blank">Pelican</a>.
+        </p>
+    </footer>
+
+</body>
+</html>

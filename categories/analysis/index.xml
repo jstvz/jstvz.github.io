@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Analysis on jstvz.org</title>
+    <link>http://jstvz.org/categories/analysis/</link>
+    <description>Recent content in Analysis on jstvz.org</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 04 Aug 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://jstvz.org/categories/analysis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Scraping the LV Municipal Court database</title>
+      <link>http://jstvz.org/2013-08-04-scraping-an-aspx-page-with-python-and-selenium/</link>
+      <pubDate>Sun, 04 Aug 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://jstvz.org/2013-08-04-scraping-an-aspx-page-with-python-and-selenium/</guid>
+      <description>Case information from the Las Vegas Municipal Court can be accessed through an ASP.NET Web Form. We&amp;rsquo;ll be doing a bit of scraping.
+Case lookup. Case lookup is available here. That page contains a frame with a single form element.
+That form takes a single argument, 16 digits or less in length. I was going to tackle this with the mechanize library. First run based on the scraperwiki mechanize cheat sheet:</description>
+    </item>
+    
+  </channel>
+</rss>

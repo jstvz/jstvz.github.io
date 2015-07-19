@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="James Estevez">
+    <meta name="description" content="James Estevez&#39; development blog and personal website">
+    <meta name="keywords" content="blog,salesforce,developer,engineer,devops">
+
+    <base href="http://jstvz.org/">
+    <title>
+  Scraping the LV Municipal Court database · jstvz.org
+</title>
+
+    <link rel="canonical" href="http://jstvz.org/2013-08-04-scraping-an-aspx-page-with-python-and-selenium/">
+
+    <link href="https://fonts.googleapis.com/css?family=EB+Garamond:400,400i,700,700i" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="http://jstvz.org/css/style.min.css">
+
+    
+
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-16x16.png" sizes="16x16">
+
+    
+
+    <meta name="generator" content="Hugo 0.40.2" />
+  </head>
+
+  <body>
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="http://jstvz.org/">
+      jstvz.org
+    </a>
+    
+    <ul class="navigation-list float-right">
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/posts/">Blog</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/projects/">Projects</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/about/">About</a>
+      </li>
+      
+    </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+  <article>
+    <header>
+      <h1 class="title">Scraping the LV Municipal Court database</h1>
+
+      
+    </header>
+
+    
+
+<p>Case information from the <a href="http://www.lasvegasnevada.gov/government/municipalcourt.htm">Las Vegas Municipal
+Court</a> can
+be accessed through an ASP.NET Web Form. We&rsquo;ll be doing a bit of scraping.</p>
+
+<h2 id="case-lookup">Case lookup.</h2>
+
+<p>Case lookup is available
+<a href="http://www.lasvegasnevada.gov/Government/28413.htm">here</a>. That page
+contains a
+<a href="https://secure2.lasvegasnevada.gov/defendantreport/Default.aspx">frame</a>
+with a single form element.</p>
+
+<p>That form takes a single argument, 16 digits or less in length. I was going to tackle this with the <code>mechanize</code> library. First run based on
+the scraperwiki <a href="https://views.scraperwiki.com/run/python_mechanize_cheat_sheet/"><code>mechanize</code> cheat
+sheet</a>:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#5bc4bf">import</span> <span style="color:#fec418">mechanize</span>
+
+br <span style="color:#5bc4bf">=</span> mechanize<span style="color:#5bc4bf">.</span>Browser() 
+br<span style="color:#5bc4bf">.</span>set_all_readonly(False) <span style="color:#776e71"># allow everything to be written to </span>
+br<span style="color:#5bc4bf">.</span>set_handle_robots(False) <span style="color:#776e71"># no robots </span>
+br<span style="color:#5bc4bf">.</span>set_handle_refresh(False) <span style="color:#776e71"># can sometimes hang without this </span>
+br<span style="color:#5bc4bf">.</span>addheaders <span style="color:#5bc4bf">=</span> [(<span style="color:#48b685">&#39;User-agent&#39;</span>, <span style="color:#48b685">&#39;Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1&#39;</span>)] </code></pre></div>
+<p>And get our target url:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">target <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#39;https://secure2.lasvegasnevada.gov/defendantreport/Default.aspx&#39;</span>
+
+response <span style="color:#5bc4bf">=</span> br<span style="color:#5bc4bf">.</span>open(target)
+<span style="color:#815ba4">print</span> response<span style="color:#5bc4bf">.</span>read()</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">    <span style="color:#776e71">&lt;!DOCTYPE html PUBLIC &#34;-//W3C//DTD XHTML 1.0 Transitional//EN&#34; &#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&#34;&gt;</span>
+    &lt;<span style="color:#5bc4bf">html</span> <span style="color:#06b6ef">xmlns</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;http://www.w3.org/1999/xhtml&#34;</span>&gt;
+        &lt;<span style="color:#5bc4bf">head</span>&gt;&lt;<span style="color:#5bc4bf">title</span>&gt;
+        City of Las Vegas Court Case Lookup
+    &lt;/<span style="color:#5bc4bf">title</span>&gt;&lt;<span style="color:#5bc4bf">link</span> <span style="color:#06b6ef">rel</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;stylesheet&#34;</span> <span style="color:#06b6ef">type</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;text/css&#34;</span> <span style="color:#06b6ef">href</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;http://www.lasvegasnevada.gov/includes/stylesheetSmall.css&#34;</span> /&gt;
+
+    [...]</code></pre></div>
+<p>We know that there&rsquo;s only one form, but let&rsquo;s see:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"> 
+<span style="color:#815ba4">for</span> form <span style="color:#5bc4bf">in</span> br<span style="color:#5bc4bf">.</span>forms():
+    <span style="color:#815ba4">print</span> <span style="color:#48b685">&#34;Form name:&#34;</span>, form<span style="color:#5bc4bf">.</span>name
+    <span style="color:#815ba4">print</span> form</code></pre></div>
+<pre><code>Form name: None
+&lt;POST https://secure2.lasvegasnevada.gov/defendantreport/Default.aspx application/x-www-form-urlencoded
+  &lt;HiddenControl(__EVENTTARGET=) (readonly)&gt;
+  &lt;HiddenControl(__EVENTARGUMENT=) (readonly)&gt;
+  &lt;HiddenControl(__VIEWSTATE=/wEPDwULLTE3MDc4NTU3NDBkZBFZvEXEM/AfxRuZRWuEEWJrOA5E0fGHGTe0sOVSnEAZ) (readonly)&gt;
+  &lt;HiddenControl(__EVENTVALIDATION=/wEWAwLdxISPDgL43ua9AQK3leriC2s/4orhhWHuQloqbi0JGVVNeFua4wyBGgXiQ+jkAsML) (readonly)&gt;
+  &lt;TextControl(txt_CaseNo=)&gt;
+  &lt;SubmitControl(btn_GetCase=Get Report) (readonly)&gt;&gt;
+</code></pre>
+
+<p>As we expected, a single form. We&rsquo;ll select this form and iterate
+through the controls:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">br<span style="color:#5bc4bf">.</span>form <span style="color:#5bc4bf">=</span> list(br<span style="color:#5bc4bf">.</span>forms())[<span style="color:#f99b15">0</span>]
+<span style="color:#815ba4">for</span> control <span style="color:#5bc4bf">in</span> br<span style="color:#5bc4bf">.</span>form<span style="color:#5bc4bf">.</span>controls:
+    <span style="color:#815ba4">print</span> control
+    <span style="color:#815ba4">print</span> <span style="color:#48b685">&#34;type=</span><span style="color:#f99b15">%s</span><span style="color:#48b685">, name=</span><span style="color:#f99b15">%s</span><span style="color:#48b685"> value=</span><span style="color:#f99b15">%s</span><span style="color:#48b685">&#34;</span> <span style="color:#5bc4bf">%</span> (control<span style="color:#5bc4bf">.</span>type, control<span style="color:#5bc4bf">.</span>name, br[control<span style="color:#5bc4bf">.</span>name])</code></pre></div>
+<pre><code>    &lt;HiddenControl(__EVENTTARGET=) (readonly)&gt;
+    type=hidden, name=__EVENTTARGET value=
+    &lt;HiddenControl(__EVENTARGUMENT=) (readonly)&gt;
+    type=hidden, name=__EVENTARGUMENT value=
+    &lt;HiddenControl(__VIEWSTATE=/wEPDwULLTE3MDc4NTU3NDBkZBFZvEXEM/AfxRuZRWuEEWJrOA5E0fGHGTe0sOVSnEAZ) (readonly)&gt;
+    type=hidden, name=__VIEWSTATE value=/wEPDwULLTE3MDc4NTU3NDBkZBFZvEXEM/AfxRuZRWuEEWJrOA5E0fGHGTe0sOVSnEAZ
+    &lt;HiddenControl(__EVENTVALIDATION=/wEWAwLdxISPDgL43ua9AQK3leriC2s/4orhhWHuQloqbi0JGVVNeFua4wyBGgXiQ+jkAsML) (readonly)&gt;
+    type=hidden, name=__EVENTVALIDATION value=/wEWAwLdxISPDgL43ua9AQK3leriC2s/4orhhWHuQloqbi0JGVVNeFua4wyBGgXiQ+jkAsML
+    &lt;TextControl(txt_CaseNo=)&gt;
+    type=text, name=txt_CaseNo value=
+    &lt;SubmitControl(btn_GetCase=Get Report) (readonly)&gt;
+    type=submit, name=btn_GetCase value=Get Report
+</code></pre>
+
+<p>More of the same. Create a single test number and submit our query:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">test_num <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#39;C1002073A&#39;</span>
+br[<span style="color:#48b685">&#34;txt_CaseNo&#34;</span>] <span style="color:#5bc4bf">=</span> test_num
+
+response <span style="color:#5bc4bf">=</span> br<span style="color:#5bc4bf">.</span>submit()
+<span style="color:#815ba4">print</span> response<span style="color:#5bc4bf">.</span>read()
+<span style="color:#815ba4">print</span> br<span style="color:#5bc4bf">.</span>response()<span style="color:#5bc4bf">.</span>read()</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">    [...]
+    &lt;<span style="color:#5bc4bf">div</span>&gt;
+    &lt;<span style="color:#5bc4bf">input</span> <span style="color:#06b6ef">name</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;txt_CaseNo&#34;</span> <span style="color:#06b6ef">type</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;text&#34;</span> <span style="color:#06b6ef">value</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;C1002073A&#34;</span> <span style="color:#06b6ef">maxlength</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;16&#34;</span> <span style="color:#06b6ef">id</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;txt_CaseNo&#34;</span> <span style="color:#06b6ef">style</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;font-size:12px;height:20px;width:175px;&#34;</span> /&gt; &amp;nbsp;
+    &lt;<span style="color:#5bc4bf">input</span> <span style="color:#06b6ef">type</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;submit&#34;</span> <span style="color:#06b6ef">name</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;btn_GetCase&#34;</span> <span style="color:#06b6ef">value</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;Get Report&#34;</span> <span style="color:#06b6ef">onclick</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&amp;quot;btn_GetCase&amp;quot;, &amp;quot;&amp;quot;, true, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;, false, false))&#34;</span> <span style="color:#06b6ef">id</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;btn_GetCase&#34;</span> <span style="color:#06b6ef">class</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;formButton&#34;</span> /&gt;&lt;<span style="color:#5bc4bf">br</span> /&gt;
+    &lt;<span style="color:#5bc4bf">span</span> <span style="color:#06b6ef">id</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;validMessage&#34;</span> <span style="color:#06b6ef">class</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;alertMssg&#34;</span> <span style="color:#06b6ef">style</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;display:none;&#34;</span>&gt;Please enter a case ID&lt;/<span style="color:#5bc4bf">span</span>&gt;
+    &lt;<span style="color:#5bc4bf">span</span> <span style="color:#06b6ef">id</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;lblError&#34;</span>&gt;&lt;/<span style="color:#5bc4bf">span</span>&gt;
+    &lt;/<span style="color:#5bc4bf">div</span>&gt;
+    [...]</code></pre></div>
+<p>Which isn&rsquo;t what we wanted.</p>
+
+<h3 id="selenium-deals-with-the-javascript-for-us">Selenium deals with the Javascript for us</h3>
+
+<p>It would appear that problem here is javascript. I&rsquo;m too lazy to figure out what&rsquo;s
+happening here so I&rsquo;m going to just throw in a grenade:
+<a href="http://docs.seleniumhq.org/">Selenium</a>.</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#5bc4bf">from</span> <span style="color:#fec418">selenium</span> <span style="color:#5bc4bf">import</span> webdriver
+<span style="color:#5bc4bf">from</span> <span style="color:#fec418">selenium.webdriver.common.keys</span> <span style="color:#5bc4bf">import</span> Keys</code></pre></div>
+<p>Needed to figure out exactly how Selenium works, so using a rough approximation
+of the example on
+<a href="http://selenium-python.readthedocs.org/en/latest/getting-started.html#">RTD</a>:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">p <span style="color:#5bc4bf">=</span> webdriver<span style="color:#5bc4bf">.</span>FirefoxProfile()
+p<span style="color:#5bc4bf">.</span>set_preference(<span style="color:#48b685">&#34;webdriver.log.file&#34;</span>, <span style="color:#48b685">&#34;/tmp/firefox_console&#34;</span>)
+driver <span style="color:#5bc4bf">=</span> webdriver<span style="color:#5bc4bf">.</span>Firefox(p)
+driver<span style="color:#5bc4bf">.</span>get(url)
+<span style="color:#815ba4">assert</span> <span style="color:#48b685">&#34;City of Las Vegas Court Case Lookup&#34;</span> <span style="color:#5bc4bf">in</span> driver<span style="color:#5bc4bf">.</span>title</code></pre></div>
+<p>Which works fine.</p>
+
+<p>It would appear that our issue with getting the second page is that the lookup spits
+out via a call to <code>window.open</code>, the problem being that it uses <code>null</code>
+as the <code>window.title</code>. Looking up the pop-up window via the page title
+is brittle at best, so I just pulled all the window handles into a <code>for</code>
+loop and matched urls before writing the page source to disk.</p>
+
+<p>Got a new browser window with Selenium, so now let&rsquo;s define a function to save
+our report to disk&hellip;</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#815ba4">def</span> <span style="color:#06b6ef">get_lvmc_case_report</span>(caseNumber):
+    driver <span style="color:#5bc4bf">=</span> webdriver<span style="color:#5bc4bf">.</span>Firefox()
+    driver<span style="color:#5bc4bf">.</span>get(url)
+    casenum <span style="color:#5bc4bf">=</span> driver<span style="color:#5bc4bf">.</span>find_element_by_name(<span style="color:#48b685">&#39;txt_CaseNo&#39;</span>)
+    casenum<span style="color:#5bc4bf">.</span>send_keys(caseNumber)
+    casenum<span style="color:#5bc4bf">.</span>send_keys(Keys<span style="color:#5bc4bf">.</span>RETURN)
+    driver<span style="color:#5bc4bf">.</span>implicitly_wait(<span style="color:#48b685">&#34;30000&#34;</span>)     
+    
+    <span style="color:#815ba4">for</span> handle <span style="color:#5bc4bf">in</span> driver<span style="color:#5bc4bf">.</span>window_handles:
+        driver<span style="color:#5bc4bf">.</span>switch_to_window(handle)
+        <span style="color:#815ba4">if</span> driver<span style="color:#5bc4bf">.</span>current_url <span style="color:#5bc4bf">==</span> <span style="color:#48b685">&#39;https://secure2.lasvegasnevada.gov/defendantreport/report.aspx&#39;</span>:
+            filename <span style="color:#5bc4bf">=</span> caseNumber <span style="color:#5bc4bf">+</span> <span style="color:#48b685">&#39;.html&#39;</span>
+            outfile <span style="color:#5bc4bf">=</span> open(filename, <span style="color:#48b685">&#39;w&#39;</span>)
+            outfile<span style="color:#5bc4bf">.</span>write(driver<span style="color:#5bc4bf">.</span>page_source)               
+            outfile<span style="color:#5bc4bf">.</span>close()
+            <span style="color:#815ba4">print</span> <span style="color:#48b685">&#34;Wrote </span><span style="color:#f99b15">%s</span><span style="color:#48b685">&#34;</span> <span style="color:#5bc4bf">%</span> filename   
+    driver<span style="color:#5bc4bf">.</span>quit()</code></pre></div>
+<p>In order to test the scraper we&rsquo;ll need some case numbers. There exists
+a multitude of arrest/mugshot sites, so that&rsquo;s not particularly
+difficult. For this project I&rsquo;ll be using
+<a href="http://www.jailbase.com/en/sources/nv-clv/">Jailbase</a>, given that it
+produces an archived snapshot of the inmate entry used to source each
+arrestee&rsquo;s page, as well as an API which we may make use of later. The
+question then becomes whether or not the case number pattern holds true
+for citations, <em>i.e.</em> those seizures that did not culminate in a
+custodial arrest. Some manual checking shows at least two &ldquo;CA&rdquo;-numbers
+from non-custodial arrests.</p>
+
+<p>Also, reviewing our manual downloads leads me to notice that the case
+numbers seem to be an arithmetic progression. I manually queried a
+sequence of case numbers and all were hits so that simplified matters
+considerably. We can use a list comprehension to generate the case
+numbers and be reasonably sure that we&rsquo;ll get hits.</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">test_nums <span style="color:#5bc4bf">=</span> [<span style="color:#48b685">&#39;C1012474A&#39;</span>,<span style="color:#48b685">&#39;C101200474A&#39;</span>, <span style="color:#48b685">&#39;C1096047A&#39;</span>]
+test_seq <span style="color:#5bc4bf">=</span> [<span style="color:#48b685">&#39;C&#39;</span> <span style="color:#5bc4bf">+</span> str(x) <span style="color:#5bc4bf">+</span> <span style="color:#48b685">&#39;A&#39;</span> <span style="color:#815ba4">for</span> x <span style="color:#5bc4bf">in</span> range(<span style="color:#f99b15">1096048</span>, <span style="color:#f99b15">1096051</span>, <span style="color:#f99b15">1</span>)]
+test_seq</code></pre></div>
+<pre><code>    ['C1096048A', 'C1096049A', 'C1096050A']
+</code></pre>
+
+<p>So <code>test_nums[1]</code> is a bad case number, one not found in the DB. When
+this happens the server raises an alert message and fails to open a
+<code>report.aspx</code> window. This fails relatively gracefully.</p>
+
+<p>Now, to avoid hammering the city&rsquo;s server let&rsquo;s introduce a random wait, then use
+a <code>for</code> loop:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#5bc4bf">from</span> <span style="color:#fec418">random</span> <span style="color:#5bc4bf">import</span> randint
+<span style="color:#5bc4bf">from</span> <span style="color:#fec418">time</span> <span style="color:#5bc4bf">import</span> sleep
+ 
+<span style="color:#815ba4">for</span> test_num <span style="color:#5bc4bf">in</span> test_nums:
+    <span style="color:#815ba4">print</span> test_num
+    get_lvmc_case_report(test_num)
+    sleep(randint(<span style="color:#f99b15">1</span>,<span style="color:#f99b15">10</span>))</code></pre></div>
+<pre><code>C1012474A
+Wrote C1012474A.html
+C101200474A
+C1096047A
+Wrote C1096047A.html
+</code></pre>
+
+<p>A quick inspection of the files shows HTML tables, which was what we wanted.
+Now, let&rsquo;s try the sequential set:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#815ba4">for</span> test_num <span style="color:#5bc4bf">in</span> test_seq:
+    <span style="color:#815ba4">print</span> test_num
+    get_lvmc_case_report(test_num)
+    sleep(randint(<span style="color:#f99b15">1</span>,<span style="color:#f99b15">10</span>))</code></pre></div>
+<pre><code>C1096048A
+Wrote C1096048A.html
+C1096049A
+Wrote C1096049A.html
+C1096050A
+Wrote C1096050A.html
+</code></pre>
+
+<p><abbr title="Which Was What We Wanted">W<sup>5</sup></abbr>.
+Everything else looks good. We&rsquo;ll run this over <code>range(1010001, 1099263, 1)</code> for a total
+of 89,262 queries dating from 26 February 2010 to 3 August 2013. I&rsquo;ll shorten the sleep time upper bound to three
+seconds, cutting five days down to a day and a half.</p>
+
+<p>Run it overnight and on Sunday and start work on parsing the tables into a
+database tomorrow.</p>
+
+<p>Final notes:</p>
+
+<ol>
+<li>Should add <code>gzip</code> compression on file save.</li>
+<li>Progress bar or a counter would be nice.</li>
+<li>The connection at home is spotty, and I may need/want to put this on EC2, so
+making the script take the range from the command line is the next logical
+step.</li>
+<li>Running this in a second X session keeps it out of the way.</li>
+</ol>
+
+<p>And we finally start getting data, after making a public records request for
+that very same data that took seven weeks to deny. Script took about a half-hour
+to figure out.</p>
+
+  </article>
+
+  <br/>
+
+  
+
+</section>
+
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+     © 2018    ·  Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>. 
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

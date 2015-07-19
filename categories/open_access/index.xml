@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Open_access on jstvz.org</title>
+    <link>http://jstvz.org/categories/open_access/</link>
+    <description>Recent content in Open_access on jstvz.org</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Thu, 31 Jan 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://jstvz.org/categories/open_access/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Success Without Glamour, NIH</title>
+      <link>http://jstvz.org/posts/2013-01-31-success-without-glamour-nih/</link>
+      <pubDate>Thu, 31 Jan 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://jstvz.org/posts/2013-01-31-success-without-glamour-nih/</guid>
+      <description>Background See yesterday&amp;rsquo;s post about publications in Cell, Nature, and Science (CNS). During the discussion on Twitter Ethan Perlstein noted:
+@james_estevez @mbeisen NSF and NIH are two different tribes. Much more glamorphilia among NIH-funded academics
+&amp;mdash; Ethan Perlstein (@eperlste) January 30, 2013  and also:
+@eperlste @mbeisen Sure. Data set for F32 is much larger, ~1300, so it&amp;rsquo;ll run overnight.
+&amp;mdash; James Estevez (@james_estevez) January 30, 2013 
+So, lets repeat the analysis.</description>
+    </item>
+    
+    <item>
+      <title>Success Without Glamour</title>
+      <link>http://jstvz.org/posts/2013-01-30-success-without-glamour-nsf-biology-postdoctoral-fellows-fy2012/</link>
+      <pubDate>Wed, 30 Jan 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://jstvz.org/posts/2013-01-30-success-without-glamour-nsf-biology-postdoctoral-fellows-fy2012/</guid>
+      <description>Background So there was a discussion on Twitter, started by Michael Eisen using the hashtag #SuccessWithoutGlamour discussing the necessity of publishing in the Big Three journals (CNS, or Cell, Nature, and Science). Heartening responses, but I suspected there might be some selection bias and decided to take a marginally more quantitative look.
+Data I thought this poster by Priem and colleagues was interesting and took it as a starting point (Priem, Costello, and Dzuba 2012).</description>
+    </item>
+    
+  </channel>
+</rss>

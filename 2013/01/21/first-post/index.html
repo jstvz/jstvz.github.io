@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="James Estevez">
+    <meta name="description" content="James Estevez&#39; development blog and personal website">
+    <meta name="keywords" content="blog,salesforce,developer,engineer,devops">
+
+    <base href="http://jstvz.org/">
+    <title>
+  First post · jstvz.org
+</title>
+
+    <link rel="canonical" href="http://jstvz.org/2013/01/21/first-post/">
+
+    <link href="https://fonts.googleapis.com/css?family=EB+Garamond:400,400i,700,700i" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="http://jstvz.org/css/style.min.css">
+
+    
+
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-16x16.png" sizes="16x16">
+
+    
+
+    <meta name="generator" content="Hugo 0.40.2" />
+  </head>
+
+  <body>
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="http://jstvz.org/">
+      jstvz.org
+    </a>
+    
+    <ul class="navigation-list float-right">
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/posts/">Blog</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/projects/">Projects</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/about/">About</a>
+      </li>
+      
+    </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+  <article>
+    <header>
+      <h1 class="title">First post</h1>
+
+      
+    </header>
+
+    
+
+<p>In lieu of a &ldquo;Hello World&rdquo; post, let&rsquo;s make a figure to illustrate the Wikipedia article on <a href="http://en.wikipedia.org/wiki/Bacterial_genome_size">bacterial genome size</a>. Boilerplate and libraries out first:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#5bc4bf">library</span>(grDevices)
+<span style="color:#5bc4bf">library</span>(ggplot2)
+<span style="color:#5bc4bf">library</span>(plyr)
+<span style="color:#5bc4bf">library</span>(taxize)
+<span style="color:#5bc4bf">library</span>(knitcitations)</code></pre></div>
+<h3 id="get-the-data">Get the data</h3>
+
+<p>We&rsquo;ll need data, of course:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#776e71"># Download our tables from NCBI&#39;s FTP site. Accessed Mon Jan 21 20:36:36</span>
+<span style="color:#776e71"># PST 2013</span>
+prok <span style="color:#5bc4bf">&lt;-</span> read.table(<span style="color:#48b685">&#34;ftp://ftp.ncbi.nlm.nih.gov/genomes/GENOME_REPORTS/prokaryotes.txt&#34;</span>, 
+    sep <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;\t&#34;</span>, comment.char <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;!&#34;</span>, header <span style="color:#5bc4bf">=</span> T, stringsAsFactors <span style="color:#5bc4bf">=</span> F)
+
+<span style="color:#776e71"># Clear missing values (&#39;-&#39;)</span>
+prok.cut <span style="color:#5bc4bf">&lt;-</span> prok[(prok<span style="color:#5bc4bf">$</span>Size..Mb. <span style="color:#5bc4bf">!=</span> <span style="color:#48b685">&#34;-&#34;</span>) <span style="color:#5bc4bf">&amp;</span> (prok<span style="color:#5bc4bf">$</span>Proteins <span style="color:#5bc4bf">!=</span> <span style="color:#48b685">&#34;-&#34;</span>), ]
+
+<span style="color:#776e71"># Set classes</span>
+prok.cut<span style="color:#5bc4bf">$</span>Size..Mb. <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">as.numeric</span>(prok.cut<span style="color:#5bc4bf">$</span>Size..Mb.)
+prok.cut<span style="color:#5bc4bf">$</span>Proteins <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">as.numeric</span>(prok.cut<span style="color:#5bc4bf">$</span>Proteins)
+prok.cut<span style="color:#5bc4bf">$</span>Group <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">as.factor</span>(prok.cut<span style="color:#5bc4bf">$</span>Group)</code></pre></div>
+<p>One should probably differentiate between bacteria and archea (Pace, 2006). I make use of the <a href="http://ropensci.org/tutorials/taxize_tutorial.html"><code>taxize</code></a> by Chamberlain <em>et. al.</em> (2012) package we loaded earlier. I&rsquo;ll also use <code>plyr</code> (Wickham, 2011) to put it all together:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#776e71"># From which domain of life does each genome come?</span>
+groups <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">levels</span>(prok.cut<span style="color:#5bc4bf">$</span>Group)
+get_domain <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">function</span>(x) {
+    first.hit <span style="color:#5bc4bf">&lt;-</span> classification(get_uid(x))[[<span style="color:#f99b15">1</span>]]  <span style="color:#776e71"># return the first hit</span>
+    kingdom <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">as.character</span>(first.hit[<span style="color:#815ba4">which</span>(first.hit[, <span style="color:#48b685">&#34;Rank&#34;</span>] <span style="color:#5bc4bf">==</span> <span style="color:#48b685">&#34;superkingdom&#34;</span>), 
+        <span style="color:#f99b15">1</span>])  <span style="color:#776e71"># extract domain</span>
+    <span style="color:#815ba4">return</span>(<span style="color:#fec418">data.frame</span>(Group <span style="color:#5bc4bf">=</span> x, Domain <span style="color:#5bc4bf">=</span> kingdom))
+}
+domains <span style="color:#5bc4bf">&lt;-</span> ldply(groups, get_domain)
+foo <span style="color:#5bc4bf">&lt;-</span> prok.cut
+prok.cut <span style="color:#5bc4bf">&lt;-</span> <span style="color:#815ba4">merge</span>(prok.cut, domains, by <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;Group&#34;</span>)</code></pre></div>
+<h3 id="drawing-the-plot">Drawing the plot</h3>
+
+<p>I&rsquo;ll use <a href="http://ggplot2.org/">ggplot2</a> for the figure (Wickham, 2009). Lets export to SVG:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#776e71"># Draw our plot</span>
+p <span style="color:#5bc4bf">&lt;-</span> ggplot(prok.cut, aes(Size..Mb., Proteins, color <span style="color:#5bc4bf">=</span> Domain))
+
+<span style="color:#776e71"># Save our plot to SVG</span>
+svg(filename <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;ncbi-prok-genomesize.svg&#34;</span>, width <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">14</span>, height <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">8</span>)
+p <span style="color:#5bc4bf">+</span> geom_point(alpha <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">0.5</span>, size <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">2</span>) <span style="color:#5bc4bf">+</span> scale_y_log10() <span style="color:#5bc4bf">+</span> scale_x_log10() <span style="color:#5bc4bf">+</span> 
+    scale_shape(solid <span style="color:#5bc4bf">=</span> <span style="color:#815ba4">FALSE</span>) <span style="color:#5bc4bf">+</span> ggtitle(<span style="color:#48b685">&#34;The total genome size and the number of genes in bacteria and archaea.&#34;</span>) <span style="color:#5bc4bf">+</span> 
+    xlab(<span style="color:#48b685">&#34;Genome size (Megabases)&#34;</span>) <span style="color:#5bc4bf">+</span> ylab(<span style="color:#48b685">&#34;Number of protein coding genes&#34;</span>) <span style="color:#5bc4bf">+</span> 
+    scale_colour_brewer(type <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;qual&#34;</span>, palette <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">3</span>)
+dev.off()</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">p <span style="color:#5bc4bf">&lt;-</span> ggplot(prok.cut, aes(Size..Mb., Proteins, color <span style="color:#5bc4bf">=</span> Domain))
+
+p <span style="color:#5bc4bf">+</span> geom_point(alpha <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">0.5</span>, size <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">2</span>) <span style="color:#5bc4bf">+</span> scale_y_log10() <span style="color:#5bc4bf">+</span> scale_x_log10() <span style="color:#5bc4bf">+</span> 
+    scale_shape(solid <span style="color:#5bc4bf">=</span> <span style="color:#815ba4">FALSE</span>) <span style="color:#5bc4bf">+</span> ggtitle(<span style="color:#48b685">&#34;The total genome size and the number of genes in bacteria and archaea.&#34;</span>) <span style="color:#5bc4bf">+</span> 
+    xlab(<span style="color:#48b685">&#34;Genome size (Megabases)&#34;</span>) <span style="color:#5bc4bf">+</span> ylab(<span style="color:#48b685">&#34;Number of protein coding genes&#34;</span>) <span style="color:#5bc4bf">+</span> 
+    scale_colour_brewer(type <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#34;qual&#34;</span>, palette <span style="color:#5bc4bf">=</span> <span style="color:#f99b15">3</span>)</code></pre></div>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/Genome_size_vs_number_of_genes.svg" alt="Genome size vs. gene count." /></p>
+
+<p>There you have it. Post the final figure to <a href="http://commons.wikimedia.org/wiki/File:Ncbi-prok-genomesize.svg">Wikimedia
+Commons</a> and
+done. Written with <a href="http://yihui.name/knitr/">knitr</a> (Xie, 2012), with
+<a href="http://www.carlboettiger.info/2012/05/30/knitcitations.html">knitcitations</a>
+(Boettiger, 2012).</p>
+
+<h3 id="references">References</h3>
+
+<div class="csl-bib-body" style="line-height: 1.35; ">
+  <div class="csl-entry" style="margin-bottom: 1em;">Boettiger C. 2012.
+  knitcitations: Citations for knitr markdown files. Available from: <a href="http://CRAN.R-project.org/package=knitcitations">http://CRAN.R-project.org/package=knitcitations</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=knitcitations%3A%20Citations%20for%20knitr%20markdown%20files&amp;rft.aufirst=Carl&amp;rft.aulast=Boettiger&amp;rft.au=Carl%20Boettiger&amp;rft.date=2012"/>
+  <div class="csl-entry" style="margin-bottom: 1em;">Chamberlain S, Szoecs E,
+  Boettiger C. 2012. taxize: Taxonomic search and phylogeny retrieval. Available
+  from: <a href="http://CRAN.R-project.org/package=taxize">http://CRAN.R-project.org/package=taxize</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=taxize%3A%20Taxonomic%20search%20and%20phylogeny%20retrieval.&amp;rft.aufirst=Scott&amp;rft.aulast=Chamberlain&amp;rft.au=Scott%20Chamberlain&amp;rft.au=Eduard%20Szoecs&amp;rft.au=Carl%20Boettiger&amp;rft.date=2012"/>
+   <div class="csl-entry" style="margin-bottom: 1em;">Pace NR. 2006. Time for a change. Nature 441:289–289.Available
+  from: <a href="http://ww.cafescicolorado.org/Time%20for%20a%20change.pdf">http://ww.cafescicolorado.org/Time%20for%20a%20change.pdf</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=Time%20for%20a%20change&amp;rft.jtitle=Nature&amp;rft.volume=441&amp;rft.issue=7091&amp;rft.aufirst=N.R.&amp;rft.aulast=Pace&amp;rft.au=N.R.%20Pace&amp;rft.date=2006&amp;rft.pages=289%E2%80%93289"/>
+  <div class="csl-entry" style="margin-bottom: 1em;">Wickham H. 2009. ggplot2:
+  elegant graphics for data analysis. Springer New York Available from: <a
+  href="http://had.co.nz/ggplot2/book">http://had.co.nz/ggplot2/book</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_id=urn%3Aisbn%3A978-0-387-98140-6&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=ggplot2%3A%20elegant%20graphics%20for%20data%20analysis&amp;rft.publisher=Springer%20New%20York&amp;rft.aufirst=Hadley&amp;rft.aulast=Wickham&amp;rft.au=Hadley%20Wickham&amp;rft.date=2009&amp;rft.isbn=978-0-387-98140-6"/>
+  <div class="csl-entry" style="margin-bottom: 1em;">Wickham H. 2011. The
+  Split-Apply-Combine Strategy for Data Analysis. Journal of Statistical
+  Software [Internet] 40:1–29. Available from: <a
+  href="http://www.jstatsoft.org/v40/i01/">http://www.jstatsoft.org/v40/i01/</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.atitle=The%20Split-Apply-Combine%20Strategy%20for%20Data%20Analysis&amp;rft.jtitle=Journal%20of%20Statistical%20Software&amp;rft.volume=40&amp;rft.issue=1&amp;rft.aufirst=Hadley&amp;rft.aulast=Wickham&amp;rft.au=Hadley%20Wickham&amp;rft.date=2011&amp;rft.pages=1%E2%80%9329"/>
+  <div class="csl-entry">Xie Y. 2012. knitr: A general-purpose package for
+  dynamic report generation in R. Available from: <a
+  href="http://CRAN.R-project.org/package=knitr">http://CRAN.R-project.org/package=knitr</a></div>
+  <span class="Z3988" title="url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=knitr%3A%20A%20general-purpose%20package%20for%20dynamic%20report%20generation%20in%20R&amp;rft.aufirst=Yihui&amp;rft.aulast=Xie&amp;rft.au=Yihui%20Xie&amp;rft.date=2012"/>
+</div>
+
+  </article>
+
+  <br/>
+
+  
+
+</section>
+
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+     © 2018    ·  Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>. 
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

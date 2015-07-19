@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Wikipedia on jstvz.org</title>
+    <link>http://jstvz.org/categories/wikipedia/</link>
+    <description>Recent content in Wikipedia on jstvz.org</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Mon, 21 Jan 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://jstvz.org/categories/wikipedia/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>First post</title>
+      <link>http://jstvz.org/2013/01/21/first-post/</link>
+      <pubDate>Mon, 21 Jan 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://jstvz.org/2013/01/21/first-post/</guid>
+      <description>In lieu of a &amp;ldquo;Hello World&amp;rdquo; post, let&amp;rsquo;s make a figure to illustrate the Wikipedia article on bacterial genome size. Boilerplate and libraries out first:
+library(grDevices) library(ggplot2) library(plyr) library(taxize) library(knitcitations) Get the data We&amp;rsquo;ll need data, of course:
+# Download our tables from NCBI&amp;#39;s FTP site. Accessed Mon Jan 21 20:36:36 # PST 2013 prok &amp;lt;- read.table(&amp;#34;ftp://ftp.ncbi.nlm.nih.gov/genomes/GENOME_REPORTS/prokaryotes.txt&amp;#34;, sep = &amp;#34;\t&amp;#34;, comment.char = &amp;#34;!&amp;#34;, header = T, stringsAsFactors = F) # Clear missing values (&amp;#39;-&amp;#39;) prok.</description>
+    </item>
+    
+  </channel>
+</rss>

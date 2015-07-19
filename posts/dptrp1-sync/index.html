@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="James Estevez">
+    <meta name="description" content="James Estevez&#39; development blog and personal website">
+    <meta name="keywords" content="blog,salesforce,developer,engineer,devops">
+
+    <base href="http://jstvz.org/">
+    <title>
+  Automated download of Sony Digital Paper notes on Linux · jstvz.org
+</title>
+
+    <link rel="canonical" href="http://jstvz.org/posts/dptrp1-sync/">
+
+    <link href="https://fonts.googleapis.com/css?family=EB+Garamond:400,400i,700,700i" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="http://jstvz.org/css/style.min.css">
+
+    
+
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://jstvz.org/images/favicon-16x16.png" sizes="16x16">
+
+    
+
+    <meta name="generator" content="Hugo 0.40.2" />
+  </head>
+
+  <body>
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="http://jstvz.org/">
+      jstvz.org
+    </a>
+    
+    <ul class="navigation-list float-right">
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/posts/">Blog</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/projects/">Projects</a>
+      </li>
+      
+      <li class="navigation-item">
+        <a class="navigation-link" href="/pages/about/">About</a>
+      </li>
+      
+    </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+  <article>
+    <header>
+      <h1 class="title">Automated download of Sony Digital Paper notes on Linux</h1>
+
+      
+    </header>
+
+    
+
+<p>I kept up my use of a laboratory notebook (<a href="https://velasciences.com/">Vela</a>&rsquo;s are my favorite) for a long time, but
+archiving them involved either keeping 50 pounds of paper notebooks or sawing off the
+bindings and scanning them. I made a couple of attempts to find an acceptable digital
+notetaking solution, but found that the other options I tried, the Apple iPad Pro + Apple
+Pencil and Surface Pro, were unpleasant to write on. Enter the <a href="https://www.sony.com/electronics/digital-paper-notepads/dpt-series">Sony Digital Paper</a>.</p>
+
+<p>The Sony Digital Paper tablets are something I would have killed for back when I was in
+school. Besides general note-taking, they&rsquo;re useful for reading technical books and the
+occasional research paper. The first model, <a href="https://en.wikipedia.org/wiki/Sony_Digital_Paper_DPTS1">DPT-S1</a>, played well
+with Linux and was supported by <a href="https://calibre-ebook.com/">Calibre</a> after v2.33, but cost $1,100 USD at launch. It
+also supported WebDAV, had a built-in browser, and provided a filesystem accessible via
+USB. The successor model, <a href="https://goodereader.com/blog/electronic-readers/hands-on-review-of-the-sony-digital-paper-dpt-rp1">DPT-RP1</a>, improved the hardware but crippled the software. Now
+the <strong>only</strong> mechanism to transfer files was via Sony&rsquo;s Digital Paper app running on a
+Windows or MacOS computer, full stop. I worked around this by running the DPA in a
+Windows 10 VM, which allowed me to add books from my library to the device, but proved
+impractical for automatically keeping my notes in sync.</p>
+
+<p><a href="https://github.com/janten">Jan-Gerd Tenberge</a>&rsquo;s excellent <a href="https://github.com/janten/dpt-rp1-py">dpt-rp1-py</a> library provided a solution. The rest of this
+post describes the steps and code I used to set up automatic downloading of my notes.
+(These files are available in this <a href="https://gist.github.com/jstvz/35f0af8f23c740b0ae5cbd30adc5cb8b">gist</a>.)</p>
+
+<h2 id="installation-and-registration">Installation and registration</h2>
+
+<p>The <code>dpt-rp1-py</code> library provides a command line utility. We begin by using it to
+register with the device and obtain a private key:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dptrp1 --client-id .dpt-client --key .dpt.key --addr <span style="color:#f99b15">192</span>.168.1.101 register</code></pre></div>
+<p>Which places our client id and key at <code>~/.dpt-client</code> and <code>~/.dpt.key</code>, respectively.</p>
+
+<p>Initially I tried using <code>--addr digitalpaper.local</code>, but failed to resolve the domain.
+We can use <a href="https://wiki.archlinux.org/index.php/Avahi">Avahi</a> for local hostname resolution:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ avahi-resolve -n digitalpaper.local
+Failed to create client object: Daemon not running</code></pre></div>
+<p>Which we fix by enabling the daemon:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ sudo systemctl enable avahi-daemon.service
+$ sudo systemctl start avahi-daemon.service</code></pre></div>
+<p>Rerunning the command results in the correct output:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ avahi-resolve -n digitalpaper.local
+digitalpaper.local	<span style="color:#f99b15">192</span>.168.1.101</code></pre></div>
+<p>Next we download and upload a file. We begin by describing the available commands:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dptrp1 --help</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">usage: dptrp1 [-h] --client-id CLIENT_ID --key KEY [--addr ADDR]
+              {delete,download,list-documents,new-folder,register,screenshot,upload,wifi,wifi-add,wifi-del,wifi-disable,wifi-enable,wifi-list,wifi-scan}
+              [command_args [command_args ...]]
+
+Remote control for Sony DPT-RP1
+
+positional arguments:
+  {delete,download,list-documents,new-folder,register,screenshot,upload,wifi,wifi-add,wifi-del,wifi-disable,wifi-enable,wifi-list,wifi-scan}
+                        Command to run
+  command_args          Arguments for the command
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --client-id CLIENT_ID
+                        File containing the device&#39;s client id
+  --key KEY             File containing the device&#39;s private key
+  --addr ADDR           Hostname or IP address of the device</code></pre></div>
+<p>So let&rsquo;s begin by seeing what documents we can list:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dptrp1 --client-id ~/.dpt-client --key ~/.dpt.key --addr <span style="color:#f99b15">192</span>.168.1.101 list-documents</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">Document/Book Dump/Software Engineering/Learning Python Design Patterns - Gennadiy Zlobin.pdf
+Document/Note/Career.pdf
+Document/Note/Project_20180526.pdf
+Document/Note/Project_20180515.pdf
+Document/Note/Tooling.pdf
+Document/Note/Zebra Daily Schedule_20180410.pdf
+Document/Note/Meeting Notes_20180425.pdf
+Document/Note/Zebra Daily Schedule_20180420.pdf
+Document/Note/Zebra Daily Schedule_20180424.pdf
+Document/Note/Notepad_20180424.pdf
+Document/Note/Personal_Projects.pdf
+Document/nyt-italic-worksheet.pdf
+Document/Note/Lab_20180329.pdf
+Document/Note/JS XML Parser.pdf
+Document/Book Dump/Software Engineering/Node.js Design Patterns - Mario Casciaro.pdf
+Document/Book Dump/Software Engineering/Node.js Design Patterns - Mario Casciaro_Note.pdf
+[...]</code></pre></div>
+<p>Anyhow, let&rsquo;s download the file we care about, my job search notes:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dptrp1 --client-id ~/.dpt-client --key ~/.dpt.key --addr <span style="color:#f99b15">192</span>.168.1.101 <span style="color:#f99b15">\
+</span><span style="color:#f99b15"></span> download Document/Note/Career.pdf ~/org/pdf/Career.pdf</code></pre></div>
+<p>Which works. Now, let&rsquo;s upload a book we want to read, Fluent Python:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dptrp1 --client-id ~/.dpt-client --key ~/.dpt.key --addr <span style="color:#f99b15">192</span>.168.1.101 <span style="color:#f99b15">\
+</span><span style="color:#f99b15"></span>  upload <span style="color:#48b685">&#39;/home/je/Dropbox/Books/Fluent Python - Luciano Ramalho.pdf&#39;</span> <span style="color:#48b685">&#39;Document/Fluent Python.pdf&#39;</span></code></pre></div>
+<p>Which also succeeds.</p>
+
+<h2 id="automation">Automation</h2>
+
+<p>There are two steps: creating the script to handle downloading the files we want, and
+using systemd to periodically run that script (although <code>cron</code> would also work).</p>
+
+<h3 id="python-script">Python Script</h3>
+
+<p>The DPT-RP1 responds to <code>list-documents</code> with an array of JSON objects:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#5bc4bf">&#34;author&#34;</span>: <span style="color:#48b685">&#34;JME&#34;</span>,
+  <span style="color:#5bc4bf">&#34;created_date&#34;</span>: <span style="color:#48b685">&#34;2018-05-27T01:34:01Z&#34;</span>,
+  <span style="color:#5bc4bf">&#34;current_page&#34;</span>: <span style="color:#48b685">&#34;1&#34;</span>,
+  <span style="color:#5bc4bf">&#34;document_type&#34;</span>: <span style="color:#48b685">&#34;note&#34;</span>,
+  <span style="color:#5bc4bf">&#34;entry_id&#34;</span>: <span style="color:#48b685">&#34;af605956-85cd-4f0d-8471-81f694065cb4&#34;</span>,
+  <span style="color:#5bc4bf">&#34;entry_name&#34;</span>: <span style="color:#48b685">&#34;Project_20180526.pdf&#34;</span>,
+  <span style="color:#5bc4bf">&#34;entry_path&#34;</span>: <span style="color:#48b685">&#34;Document/Note/Project_20180526.pdf&#34;</span>,
+  <span style="color:#5bc4bf">&#34;entry_type&#34;</span>: <span style="color:#48b685">&#34;document&#34;</span>,
+  <span style="color:#5bc4bf">&#34;file_revision&#34;</span>: <span style="color:#48b685">&#34;39c6e6c926ab.1.0&#34;</span>,
+  <span style="color:#5bc4bf">&#34;file_size&#34;</span>: <span style="color:#48b685">&#34;126575&#34;</span>,
+  <span style="color:#5bc4bf">&#34;is_new&#34;</span>: <span style="color:#48b685">&#34;false&#34;</span>,
+  <span style="color:#5bc4bf">&#34;mime_type&#34;</span>: <span style="color:#48b685">&#34;application/pdf&#34;</span>,
+  <span style="color:#5bc4bf">&#34;modified_date&#34;</span>: <span style="color:#48b685">&#34;2018-05-29T15:47:36Z&#34;</span>,
+  <span style="color:#5bc4bf">&#34;parent_folder_id&#34;</span>: <span style="color:#48b685">&#34;c62a6d02-0b11-48e0-ab91-8d6a5df8583e&#34;</span>,
+  <span style="color:#5bc4bf">&#34;reading_date&#34;</span>: <span style="color:#48b685">&#34;2018-05-29T15:47:35Z&#34;</span>,
+  <span style="color:#5bc4bf">&#34;title&#34;</span>: <span style="color:#48b685">&#34;Project&#34;</span>,
+  <span style="color:#5bc4bf">&#34;total_page&#34;</span>: <span style="color:#48b685">&#34;1&#34;</span>
+}</code></pre></div>
+<p>Here I include a script to handle downloading my notes:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#776e71">#!/usr/bin/env python3</span>
+<span style="color:#48b685">&#34;&#34;&#34;
+</span><span style="color:#48b685">usage: dpt-notes-sync.py ip_address
+</span><span style="color:#48b685">&#34;&#34;&#34;</span>
+
+<span style="color:#5bc4bf">import</span> <span style="color:#fec418">json</span>
+<span style="color:#5bc4bf">import</span> <span style="color:#fec418">os</span>
+
+<span style="color:#5bc4bf">from</span> <span style="color:#fec418">dptrp1.dptrp1</span> <span style="color:#5bc4bf">import</span> DigitalPaper
+
+SYNC_DIR <span style="color:#5bc4bf">=</span> <span style="color:#48b685">&#39;/home/je/org/pdf/&#39;</span>
+
+<span style="color:#815ba4">def</span> <span style="color:#06b6ef">connect</span>(address):
+    <span style="color:#48b685">&#34;&#34;&#34;
+</span><span style="color:#48b685">    Loads the key and client ID to authenticate with the DPT-RP1
+</span><span style="color:#48b685">    &#34;&#34;&#34;</span>
+    <span style="color:#815ba4">with</span> open(<span style="color:#48b685">&#39;/home/je/.dpt-client&#39;</span>, <span style="color:#48b685">&#39;r&#39;</span>) <span style="color:#815ba4">as</span> f:
+        client_id <span style="color:#5bc4bf">=</span> f<span style="color:#5bc4bf">.</span>readline()<span style="color:#5bc4bf">.</span>strip()
+
+    <span style="color:#815ba4">with</span> open(<span style="color:#48b685">&#39;/home/je/.dpt.key&#39;</span>, <span style="color:#48b685">&#39;r&#39;</span>) <span style="color:#815ba4">as</span> f:
+        key <span style="color:#5bc4bf">=</span> f<span style="color:#5bc4bf">.</span>read()
+
+    dpt <span style="color:#5bc4bf">=</span> DigitalPaper(address)
+    dpt<span style="color:#5bc4bf">.</span>authenticate(client_id, key)
+    <span style="color:#815ba4">return</span> dpt
+
+<span style="color:#815ba4">def</span> <span style="color:#06b6ef">download_notes</span>(dpt):
+    <span style="color:#48b685">&#34;&#34;&#34;
+</span><span style="color:#48b685">    Given an authenticated DigitalPaper instance, download all note files to a
+</span><span style="color:#48b685">    specified directory.
+</span><span style="color:#48b685">    &#34;&#34;&#34;</span>
+    <span style="color:#815ba4">for</span> doc <span style="color:#5bc4bf">in</span> [f <span style="color:#815ba4">for</span> f <span style="color:#5bc4bf">in</span> dpt<span style="color:#5bc4bf">.</span>list_documents() <span style="color:#815ba4">if</span> is_modified_note(f)]:
+        data <span style="color:#5bc4bf">=</span> dpt<span style="color:#5bc4bf">.</span>download(doc[<span style="color:#48b685">&#39;entry_path&#39;</span>])
+        local_path <span style="color:#5bc4bf">=</span> SYNC_DIR <span style="color:#5bc4bf">+</span> os<span style="color:#5bc4bf">.</span>path<span style="color:#5bc4bf">.</span>basename(doc[<span style="color:#48b685">&#39;entry_path&#39;</span>])
+        <span style="color:#815ba4">with</span> open(local_path, <span style="color:#48b685">&#39;wb&#39;</span>) <span style="color:#815ba4">as</span> f:
+            f<span style="color:#5bc4bf">.</span>write(data)
+        <span style="color:#815ba4">print</span>(<span style="color:#48b685">&#39;Saved {} to {}&#39;</span><span style="color:#5bc4bf">.</span>format(doc[<span style="color:#48b685">&#39;entry_path&#39;</span>], local_path))
+
+
+<span style="color:#815ba4">def</span> <span style="color:#06b6ef">is_modified_note</span>(doc):
+    <span style="color:#815ba4">if</span> doc[<span style="color:#48b685">&#39;document_type&#39;</span>] <span style="color:#5bc4bf">==</span> <span style="color:#48b685">&#39;note&#39;</span>:
+        local_path <span style="color:#5bc4bf">=</span> SYNC_DIR <span style="color:#5bc4bf">+</span> os<span style="color:#5bc4bf">.</span>path<span style="color:#5bc4bf">.</span>basename(doc[<span style="color:#48b685">&#39;entry_path&#39;</span>])
+        <span style="color:#815ba4">if</span> <span style="color:#5bc4bf">not</span> os<span style="color:#5bc4bf">.</span>path<span style="color:#5bc4bf">.</span>exists(local_path):
+            <span style="color:#815ba4">return</span> True
+        <span style="color:#815ba4">else</span>:
+            <span style="color:#815ba4">return</span> os<span style="color:#5bc4bf">.</span>path<span style="color:#5bc4bf">.</span>getmtime(local_path) <span style="color:#5bc4bf">&lt;</span> dateparser<span style="color:#5bc4bf">.</span>parse(
+                doc[<span style="color:#48b685">&#39;modified_date&#39;</span>])<span style="color:#5bc4bf">.</span>timestamp()
+
+
+<span style="color:#815ba4">if</span> __name__ <span style="color:#5bc4bf">==</span> <span style="color:#48b685">&#34;__main__&#34;</span>:
+    <span style="color:#5bc4bf">import</span> <span style="color:#fec418">argparse</span>
+    parser <span style="color:#5bc4bf">=</span> argparse<span style="color:#5bc4bf">.</span>ArgumentParser()
+    parser<span style="color:#5bc4bf">.</span>add_argument(<span style="color:#48b685">&#39;address&#39;</span>, help<span style="color:#5bc4bf">=</span><span style="color:#48b685">&#34;IP address of the DPT-RP1&#34;</span>)
+    args <span style="color:#5bc4bf">=</span> parser<span style="color:#5bc4bf">.</span>parse_args()
+
+    <span style="color:#815ba4">try</span>:
+        dpt <span style="color:#5bc4bf">=</span> connect(args<span style="color:#5bc4bf">.</span>address)
+        download_notes(dpt)
+    <span style="color:#815ba4">except</span> <span style="color:#ef6155">OSError</span>:
+        <span style="color:#815ba4">print</span>(<span style="color:#48b685">&#39;Unable to reach device, verify it is connected to the same network segment.&#39;</span>)
+        exit(<span style="color:#f99b15">1</span>)</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">Saved Document/Note/Career.pdf to /home/je/org/pdf/Career.pdf
+Saved Document/Note/Notepad_20180607.pdf to /home/je/org/pdf/Notepad_20180607.pdf
+Saved Document/Note/Project_20180526.pdf to /home/je/org/pdf/Project_20180526.pdf
+[...]
+Saved Document/Book Dump/Software Engineering/Node.js Design Patterns - Mario Casciaro_Note.pdf to /home/je/org/pdf/Node.js Design Patterns - Mario Casciaro_Note.pdf
+[...]</code></pre></div>
+<p>In <code>is_modified_note()</code> we verify that the document is a note, and that it has been
+updated since the local version was last modified, if one exists.</p>
+
+<p>We satisfy the first condition by checking the value of <code>document_type</code>. This is because
+notes created via <em>Create Note</em> are stored in <code>Document/Note</code>, while side-by-side
+documents are stored alongside their respective files. Luckily, filtering files based on
+<code>document_type</code> will also pull in any side-by-side notes created for any book. This is
+less brittle than parsing paths and using <code>doc['entry_path'].endswith('_Note.pdf')</code>.</p>
+
+<h3 id="systemd">Systemd</h3>
+
+<p>I initially used a bash wrapper to avoid having to deal with resolving <code>digitalpaper.local</code> within
+the python script.</p>
+
+<p><code>dpt-notes-sync.sh</code>:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#776e71">#!/usr/bin/env bash
+</span><span style="color:#776e71"></span>
+<span style="color:#ef6155">DPT_IP</span><span style="color:#5bc4bf">=</span><span style="color:#48b685">`</span>avahi-resolve-host-name digitalpaper.local | cut -f <span style="color:#f99b15">2</span><span style="color:#48b685">`</span>
+./home/je/bin/scripts/dpt-notes-sync.py <span style="color:#ef6155">$DPT_IP</span></code></pre></div>
+<p>I then created a <a href="https://wiki.archlinux.org/index.php/Systemd/User">systemd user unit</a> named <code>dptsync.service</code>:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Unit]
+Description=Sony DPT-RP1 note synchronization service
+After=network.target network-online.target dbus.socket
+
+[Service]
+Type=oneshot
+ExecStart=-/home/je/bin/scripts/dpt-notes-sync.sh</code></pre></div>
+<p>After a bit of googling I also found this <a href="https://gist.github.com/nickjacob/9909574">gist</a> that shows how to do this without the bash
+wrapper using <code>systemctl set-environment</code>. We then modify <code>dptsync.service</code> as follows:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Unit]
+Description=Sony DPT-RP1 note synchronization service
+After=network.target network-online.target dbus.socket
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/bash -c &#34;/usr/bin/systemctl --user set-environment DPT_IP=$(avahi-resolve-host-name digitalpaper.local | cut -f 2)&#34;
+ExecStart=-/home/je/bin/scripts/dpt-notes-sync.py ${DPT_IP}</code></pre></div>
+<p>Using the <code>=-</code> syntax tells systemd to ignore errors for this command. We do this because
+the DPT-RP1 may not be on the network or in sleep mode.</p>
+
+<p>And a <a href="https://wiki.archlinux.org/index.php/Systemd/Timers">systemd timer</a> file, <code>dptsync.timer</code>:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Unit]
+Description=Sony DPT-RP1 note synchronization service
+
+[Timer]
+OnBootSec=2m
+OnUnitActiveSec=2h
+Unit=dptsync.service
+
+[Install]
+WantedBy=timers.target</code></pre></div>
+<p>This runs our synchronization script two minutes after logging in, and every two hours
+thereafter. We then place the <code>dptysync.service</code> and <code>dptysync.timer</code> in
+<code>~/.config/systemd/user</code> and enable them:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">systemctl --user enable dptsync.timer
+systemctl --user start dptsync.timer</code></pre></div>
+<p>We can read the journal to see the sync results:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">journalctl --user-unit dptsync.service</code></pre></div><div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">-- Logs begin at Thu 2018-04-12 20:34:11 PDT, end at Fri 2018-06-08 12:10:13 PDT. --
+Jun 08 12:07:49 aponte systemd[1346]: Started Sony DPT-RP1 note synchronization service.
+Jun 08 12:10:03 aponte systemd[1346]: Starting Sony DPT-RP1 note synchronization service...
+Jun 08 12:10:11 aponte dpt-notes-sync.py[27535]: Saved Document/Note/Career.pdf to /home/je/org/pdf/Career.pdf
+Jun 08 12:10:11 aponte dpt-notes-sync.py[27535]: Saved Document/Note/Notepad_20180607.pdf to /home/je/org/pdf/Notepad_20180607.pdf
+[...]</code></pre></div>
+<p>And failed syncs are logged as follows:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">Jun 08 12:07:44 aponte systemd[1346]: Starting Sony DPT-RP1 note synchronization service...
+Jun 08 12:07:49 aponte bash[26956]: Failed to resolve host name &#39;digitalpaper.local&#39;: Timeout reached
+Jun 08 12:07:49 aponte dpt-notes-sync.py[26967]: Unable to reach device, verify it is connected to the same network segment.</code></pre></div>
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+<li><strong>Uploads</strong>: The inverse is also possible: periodically uploading documents placed in a
+specific directory to the DPT-RP1.</li>
+<li><strong>Synchronization</strong>: The logical next step would be to do two way synchronization based
+on the value of <code>modified_date</code>. However, that isn&rsquo;t my primary use case,
+archiving my project and meeting notes is.</li>
+<li><strong>Calibre Plugin</strong>: After synchronization, writing a plugin adding a DPT-RP1 device
+driver to Calibre would be the most useful to my fellow DPT owners. Unfortunately, this
+is a <a href="https://manual.calibre-ebook.com/plugins.html#module-calibre.devices.interface">non-trivial effort</a>, or someone else would have written one by now. I&rsquo;d like to
+take a look, but I&rsquo;ve got some other projects in my queue to do first.</li>
+</ul>
+
+  </article>
+
+  <br/>
+
+  
+
+</section>
+
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+     © 2018    ·  Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>. 
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
